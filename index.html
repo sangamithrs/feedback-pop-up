@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feedback Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #170FCE; /* New background color */
+        }
+        .content {
+            padding: 20px;
+            background-color: white;
+            margin: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .feedback-popup {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 90%; /* Adjust width to ensure it fits */
+            max-width: 400px; /* Set maximum width */
+            border: 1px solid #ccc;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            z-index: 1000;
+            overflow-y: auto; /* Allow scrolling if content overflows */
+            max-height: 90%; /* Ensure it fits within the viewport */
+        }
+        .feedback-popup h2 {
+            margin-top: 0;
+            color: #007BFF;
+        }
+        .feedback-popup label {
+            display: block;
+            margin-top: 10px;
+        }
+        .feedback-popup select, .feedback-popup textarea {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .feedback-popup textarea.small-textarea {
+            height: 50px; /* Adjust height to make it smaller */
+            resize: none; /* Prevent resizing */
+            width: 90%; /* Decrease width */
+        }
+        .feedback-popup button {
+            padding: 10px 20px;
+            margin-top: 10px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .feedback-popup button.close-btn {
+            background-color: #DC3545;
+        }
+        .feedback-popup .message {
+            margin-top: 10px;
+            color: #007BFF;
+        }
+    </style>
+</head>
+<body>
+    <div class="content">
+        <h1>Thank You</h1>
+        <p>A Feedback pop-up page will appear in 5 seconds</p>
+        <p>Navigate through the questions and provide your feedback.</p>
+        <p>For more information about the AI parameters used in our feedback loop, please visit <a href="ai_parameters.html" target="_blank">AI Parameters Information</a>.</p>
+
+        <!-- Other content of your website -->
+    </div>
+
+    <div class="feedback-popup" id="feedbackPopup">
+        <h2>We value your feedback!</h2>
+        <form id="feedbackForm">
+            <label>How accurate was the AI in extracting information from your CV?</label>
+            <select name="accuracy" required>
+                <option value="" selected disabled hidden></option>
+                <option value="Very accurate">Very accurate</option>
+                <option value="Moderately accurate">Moderately accurate</option>
+                <option value="Slightly accurate">Slightly accurate</option>
+                <option value="Not accurate">Not accurate</option>
+            </select>
+
+            <label>Did you find the AI's interpretation of your CV easy to understand and review?</label>
+            <select name="interpretation" required>
+                <option value="" selected disabled hidden></option>
+                <option value="Extremely easy">Extremely easy</option>
+                <option value="Very easy">Very easy</option>
+                <option value="Moderately easy">Moderately easy</option>
+                <option value="Slightly easy">Slightly easy</option>
+                <option value="Not easy at all">Not easy at all</option>
+            </select>
+
+            <label>How satisfied are you with the speed at which the AI processed your CV?</label>
+            <select name="speed" required>
+                <option value="" selected disabled hidden></option>
+                <option value="Extremely satisfied">Extremely satisfied</option>
+                <option value="Very satisfied">Very satisfied</option>
+                <option value="Moderately satisfied">Moderately satisfied</option>
+                <option value="Slightly satisfied">Slightly satisfied</option>
+                <option value="Not satisfied">Not satisfied</option>
+            </select>
+
+            <label>Did the AI miss any important information or misinterpret any sections of your CV? If yes, please specify.</label>
+            <select name="miss" required>
+                <option value="" selected disabled hidden></option>
+                <option value="No">No</option>
+                <option value="Yes">Yes</option>
+            </select>
+            <textarea name="details" placeholder="Please specify if 'Yes'" class="small-textarea"></textarea>
+
+            <label>How likely are you to recommend this CV parsing AI tool to others?</label>
+            <select name="recommend" required>
+                <option value="" selected disabled hidden></option>
+                <option value="Extremely likely">Extremely likely</option>
+                <option value="Very likely">Very likely</option>
+                <option value="Moderately likely">Moderately likely</option>
+                <option value="Slightly likely">Slightly likely</option>
+                <option value="Not likely">Not likely</option>
+            </select>
+
+            <button type="button" onclick="sendFeedback()">Submit</button>
+            <button type="button" class="close-btn" onclick="closePopup()">Close</button>
+            <p class="message">If submitted, please press 'Close' button and close the webpage tab.</p>
+        </form>
+    </div>
+
+    <script>
+        // Function to show the feedback popup
+        function showPopup() {
+            document.getElementById('feedbackPopup').style.display = 'block';
+        }
+
+        // Function to close the feedback popup
+        function closePopup() {
+            document.getElementById('feedbackPopup').style.display = 'none';
+        }
+
+        // Function to send feedback
+        function sendFeedback() {
+            const form = document.getElementById('feedbackForm');
+            const formData = new FormData(form);
+            const feedbackData = {};
+            formData.forEach((value, key) => {
+                feedbackData[key] = value;
+            });
+
+            // Send feedback to the backend server
+            fetch('/submit_feedback', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(feedbackData),
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert('Thank you for your feedback!');
+                closePopup();
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                alert('An error occurred while submitting your feedback.');
+            });
+        }
+
+        // Automatically show the feedback popup after a certain time
+        setTimeout(showPopup, 5000); // Show popup after 5 seconds
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
